@@ -21,8 +21,16 @@ app.get('/lyrics', (req, res) => {
     const query = req.query['search'];
     console.log(query);
     getData(`${geniusApiBase}/search?q=${query}`)
-        .then(data => scrapeLyrics(data.response.hits[0].result.path))
-        .then(lyrics => res.send(lyrics));
+        .then(data => {
+            if (data.response.hits[0]) {
+                scrapeLyrics(data.response.hits[0].result.path)
+                .then(lyrics => {
+                    res.send(lyrics);
+                })
+                .catch(error => res.status(404).send({message: 'Something went wrong'}));
+            }
+            else res.status(404).send({message: 'Lyrics not found'});
+        });
 })
 
 app.listen(PORT, () => {
@@ -42,7 +50,7 @@ async function scrapeLyrics(url){
     const response = await fetch(`https://genius.com${url}`);
     const text = await response.text();
     const $ = cheerio.load(text);
-    return $('.lyrics')
-        .text()
-        .trim();
+    const lyrics = $('.lyrics').text().trim();
+    console.log(lyrics);
+    return lyrics;
 }
