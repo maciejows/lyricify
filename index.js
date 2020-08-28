@@ -31,7 +31,9 @@ app.get('/lyrics', (req, res) => {
                 .catch(error => res.status(404).send({message: 'Something went wrong'}));
             }
             else res.status(404).send({message: 'Lyrics not found'});
-        });
+        })
+        .catch(error => res.status(401).send({message: 'Unauthorized - invalid token'}));
+        
 })
 
 app.listen(PORT, () => {
